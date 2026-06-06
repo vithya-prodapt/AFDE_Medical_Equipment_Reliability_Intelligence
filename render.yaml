@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: medical-equipment-ai
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        value: learner042
+      - key: OPENAI_BASE_URL
+        value: https://keygateway.arshnivlabs.com/v1
+      - key: LLM_MODEL
+        value: gpt-4o-mini
+      - key: EMBEDDING_MODEL
+        value: text-embedding-3-small
+      - key: CHROMA_PERSIST_DIR
+        value: /tmp/chroma_db
+      - key: COLLECTION_NAME
+        value: medical_equipment_incidents
+      - key: MAX_RETRIEVAL_RESULTS
+        value: "10"
+      - key: EMBEDDING_BATCH_SIZE
+        value: "50"
+      - key: SAMPLE_DATA_SIZE
+        value: "1000"
+    healthCheckPath: /health

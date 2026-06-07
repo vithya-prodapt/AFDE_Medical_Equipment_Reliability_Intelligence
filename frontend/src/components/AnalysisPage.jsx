@@ -320,7 +320,7 @@ export function AnalysisPage({ user }) {
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(DEFAULT_RESULT);
-  const [expanded, setExpanded] = useState({ recommendation: true, plan: true, incidents: true });
+  const [expanded, setExpanded] = useState({ recommendation: false, plan: false, incidents: false });
   const toggleSection = (key) => setExpanded(prev => ({ ...prev, [key]: !prev[key] }));
   const [error, setError] = useState('');
 

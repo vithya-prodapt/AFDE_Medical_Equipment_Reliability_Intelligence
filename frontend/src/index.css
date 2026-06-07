@@ -450,15 +450,15 @@ textarea {
   background: #f0f4f8;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 16px;
-  margin-bottom: 16px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
 }
 
 .pipeline-steps {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-top: 10px;
+  gap: 6px;
+  margin-top: 6px;
 }
 
 .pipeline-step {
@@ -468,7 +468,7 @@ textarea {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 6px 8px;
   position: relative;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
@@ -483,7 +483,7 @@ textarea {
 }
 
 .pipeline-icon {
-  font-size: 1.3rem;
+  font-size: 1rem;
 }
 
 .pipeline-info {
@@ -492,17 +492,21 @@ textarea {
 }
 
 .pipeline-name {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--text);
-  white-space: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pipeline-desc {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--muted);
   margin-top: 2px;
-  white-space: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pipeline-badge {
@@ -3020,7 +3024,7 @@ textarea {
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   height: 100%;
   overflow-y: auto;
-  scrollbar-width: none;
+
 }
 .analysis-left::-webkit-scrollbar { display: none; }
 
@@ -3035,7 +3039,7 @@ textarea {
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   height: 100%;
   overflow-y: auto;
-  scrollbar-width: none;
+
 }
 .analysis-right::-webkit-scrollbar { display: none; }
 
@@ -3047,8 +3051,8 @@ textarea {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -3288,12 +3292,12 @@ textarea {
   border: 1px solid #bbf7d0;
   border-left: 4px solid #16a34a;
   border-radius: 10px;
-  padding: 12px 16px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
 }
 
@@ -3301,23 +3305,23 @@ textarea {
 .analysis-severity-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .analysis-severity-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  padding: 12px 14px;
+  padding: 8px 10px;
 }
 
 /* â”€â”€ Charts row â”€â”€ */
 .analysis-charts-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .analysis-chart-card {
@@ -3535,6 +3539,8 @@ textarea {
     padding: 12px 16px;
   }
 }
+
+
 
 
 

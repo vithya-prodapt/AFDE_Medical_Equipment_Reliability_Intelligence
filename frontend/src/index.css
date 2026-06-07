@@ -2616,7 +2616,7 @@ textarea {
 }
 
 .ar-accordion-body {
-  padding: 0 18px 16px;
+  padding: 0 12px 10px;
   border-top: 1px solid #f1f5f9;
 }
 
@@ -2654,30 +2654,30 @@ textarea {
   background: #f8faff;
   border: 1px solid #e0e7ff;
   border-radius: 8px;
-  padding: 14px 16px;
+  padding: 10px 12px;
   font-size: 0.88rem;
   color: #334155;
-  line-height: 1.7;
+  line-height: 1.55;
 }
 
 .ar-plan-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .ar-plan-col {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 8px 10px;
 }
 
 .ar-plan-col-title {
   font-size: 0.75rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   letter-spacing: 0.2px;
 }
 
@@ -2687,7 +2687,7 @@ textarea {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
 }
 
 .ar-action-list li {
@@ -2734,13 +2734,13 @@ textarea {
 .ar-incidents-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .ar-incident-card {
   background: #f8fafc;
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 8px 10px;
   border: 1px solid #e2e8f0;
 }
 
@@ -2762,8 +2762,8 @@ textarea {
 .ar-incident-narrative {
   font-size: 0.82rem;
   color: #374151;
-  line-height: 1.6;
-  margin-bottom: 8px;
+  line-height: 1.45;
+  margin-bottom: 5px;
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
@@ -3001,7 +3001,7 @@ textarea {
   display: flex;
   gap: 12px;
   padding: 0 14px 16px;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
 /* â”€â”€ Left panel â”€â”€ */
@@ -3024,6 +3024,8 @@ textarea {
   border-radius: 12px;
   padding: 14px 18px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
 }
 
 /* â”€â”€ Section title with sparkle â”€â”€ */
@@ -3522,6 +3524,7 @@ textarea {
     padding: 12px 16px;
   }
 }
+
 
 
 

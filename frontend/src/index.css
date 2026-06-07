@@ -2566,9 +2566,10 @@ textarea {
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .analysis-page {
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   background: #f1f5f9;
 }
 
@@ -2578,7 +2579,7 @@ textarea {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   overflow: hidden;
-  margin-top:  10px;
+  margin-top: 8px;
 }
 
 .ar-accordion-header {
@@ -2586,7 +2587,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 18px;
+  padding: 10px 14px;
   background: none;
   border: none;
   cursor: pointer;
@@ -2600,7 +2601,7 @@ textarea {
 }
 
 .ar-accordion-title {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #1e293b;
 }
@@ -2616,7 +2617,7 @@ textarea {
 }
 
 .ar-accordion-body {
-  padding: 0 12px 10px;
+  padding: 0 18px 16px;
   border-top: 1px solid #f1f5f9;
 }
 
@@ -2654,30 +2655,30 @@ textarea {
   background: #f8faff;
   border: 1px solid #e0e7ff;
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 14px 16px;
   font-size: 0.88rem;
   color: #334155;
-  line-height: 1.55;
+  line-height: 1.7;
 }
 
 .ar-plan-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .ar-plan-col {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 12px 14px;
 }
 
 .ar-plan-col-title {
   font-size: 0.75rem;
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   letter-spacing: 0.2px;
 }
 
@@ -2687,7 +2688,7 @@ textarea {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 6px;
 }
 
 .ar-action-list li {
@@ -2740,7 +2741,7 @@ textarea {
 .ar-incident-card {
   background: #f8fafc;
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 12px 14px;
   border: 1px solid #e2e8f0;
 }
 
@@ -2762,8 +2763,8 @@ textarea {
 .ar-incident-narrative {
   font-size: 0.82rem;
   color: #374151;
-  line-height: 1.45;
-  margin-bottom: 5px;
+  line-height: 1.6;
+  margin-bottom: 8px;
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
@@ -2991,9 +2992,10 @@ textarea {
 
 /* â”€â”€ Main layout â€” fills remaining viewport height, panels scroll independently â”€â”€ */
 .analysis-page {
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   background: #f1f5f9;
 }
 
@@ -3001,18 +3003,21 @@ textarea {
   display: flex;
   gap: 12px;
   padding: 0 14px 16px;
-  align-items: flex-start;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* â”€â”€ Left panel â”€â”€ */
 .analysis-left {
   flex: 0 0 300px;
-
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 14px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  height: 100%;
+  overflow-y: auto;
 }
 
 /* â”€â”€ Right panel â”€â”€ */
@@ -3024,7 +3029,7 @@ textarea {
   border-radius: 12px;
   padding: 14px 18px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  max-height: calc(100vh - 160px);
+  height: 100%;
   overflow-y: auto;
 }
 
@@ -3524,6 +3529,9 @@ textarea {
     padding: 12px 16px;
   }
 }
+
+
+
 
 
 

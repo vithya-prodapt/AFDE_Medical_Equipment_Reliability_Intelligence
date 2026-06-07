@@ -63,26 +63,43 @@ class DataIngestionPipeline:
             })
 
         if force_reingest and existing_count > 0:
+            print("[Ingest] Backing up existing collection before re-ingest…")
+            vector_store.backup_collection()
             print("[Ingest] Clearing existing collection…")
             vector_store.delete_collection()
 
-        print(f"[Ingest] Generating embeddings for {len(narratives)} documents…")
-        embeddings = embedding_service.generate_batch_embeddings(narratives, delay=0.05)
+        try:
+            print(f"[Ingest] Generating embeddings for {len(narratives)} documents…")
+            embeddings = embedding_service.generate_batch_embeddings(narratives, delay=0.05)
 
-        print("[Ingest] Storing in ChromaDB…")
-        vector_store.add_documents(ids=ids, embeddings=embeddings, documents=narratives, metadatas=metadatas)
+            print("[Ingest] Storing in ChromaDB…")
+            vector_store.add_documents(ids=ids, embeddings=embeddings, documents=narratives, metadatas=metadatas)
 
-        print("[Ingest] Building BM25 index…")
-        hybrid_search.build_index(documents=narratives, metadatas=metadatas, ids=ids)
+            print("[Ingest] Building BM25 index…")
+            hybrid_search.build_index(documents=narratives, metadatas=metadatas, ids=ids)
 
-        final_count = vector_store.get_count()
-        print(f"[Ingest] Complete. Collection size: {final_count}")
-        return {
-            "status": "success",
-            "records_ingested": len(records),
-            "collection_size": final_count,
-            "message": f"Successfully ingested {len(records)} medical equipment incidents.",
-        }
+            final_count = vector_store.get_count()
+            print(f"[Ingest] Complete. Collection size: {final_count}")
+            return {
+                "status": "success",
+                "records_ingested": len(records),
+                "collection_size": final_count,
+                "message": f"Successfully ingested {len(records)} medical equipment incidents.",
+            }
+        except Exception as e:
+            print(f"[Ingest] Ingestion failed: {e}. Attempting rollback…")
+            if vector_store.has_backup():
+                restored = vector_store.restore_from_backup()
+                if restored:
+                    self._rebuild_bm25_index()
+                    print("[Ingest] Rollback successful — previous data restored.")
+                    return {
+                        "status": "failed",
+                        "records_ingested": 0,
+                        "collection_size": vector_store.get_count(),
+                        "message": f"Ingestion failed: {e}. Rolled back to previous dataset.",
+                    }
+            raise
 
     def _rebuild_bm25_index(self):
         data = vector_store.get_all_documents()

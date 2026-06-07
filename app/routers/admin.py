@@ -97,3 +97,64 @@ async def reset_collection():
         return {"status": "success", "message": "Collection reset successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Reset failed: {str(e)}")
+
+
+@router.post("/rollback")
+async def rollback_collection():
+    """
+    Restores the knowledge base to the last backup taken before a re-ingest.
+    A backup is created automatically whenever force_reingest=true is used.
+    """
+    if not vector_store.has_backup():
+        raise HTTPException(
+            status_code=404,
+            detail="No backup found. Run /api/ingest with force_reingest=true first to create one.",
+        )
+    try:
+        restored = vector_store.restore_from_backup()
+        if not restored:
+            raise HTTPException(status_code=500, detail="Restore failed — backup may be empty.")
+        from app.services.hybrid_search import hybrid_search
+        from app.data.ingest import ingestion_pipeline
+        ingestion_pipeline._rebuild_bm25_index()
+        return {
+            "status": "success",
+            "collection_size": vector_store.get_count(),
+            "message": "Knowledge base rolled back to previous backup successfully.",
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Rollback failed: {str(e)}")
+
+
+@router.get("/backup-status")
+async def backup_status():
+    """Returns whether a backup collection exists and how large it is."""
+    has_bk = vector_store.has_backup()
+    return {
+        "has_backup": has_bk,
+        "message": "Backup available — use POST /api/rollback to restore." if has_bk
+                   else "No backup available.",
+    }
+
+
+@router.post("/evaluate-ragas")
+async def evaluate_ragas(request: dict):
+    """
+    Runs RAGAS-compatible evaluation on a query+answer+contexts set.
+    Body: { "query": "...", "answer": "...", "contexts": ["...", "..."] }
+    """
+    try:
+        from app.evaluation.ragas_evaluator import ragas_evaluator
+        query = request.get("query", "")
+        answer = request.get("answer", "")
+        contexts = request.get("contexts", [])
+        if not query or not answer:
+            raise HTTPException(status_code=400, detail="query and answer are required.")
+        result = ragas_evaluator.evaluate(query=query, answer=answer, contexts=contexts)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"RAGAS evaluation failed: {str(e)}")

@@ -180,3 +180,48 @@ def validate_plan(output: str) -> str:
     if is_prompt_injection(text):
         return "Maintenance plan contains unsafe content and could not be generated."
     return text
+
+
+# ── Output Safety Guardrails ─────────────────────────────────────────────────
+
+UNSAFE_OUTPUT_PATTERNS = [
+    "do not call a doctor", "no need for professional", "ignore safety",
+    "stop medication", "remove the device without", "disable the alarm",
+    "override safety", "bypass the safety", "without medical supervision",
+    "self-medicate", "guaranteed to fix", "no risk involved",
+]
+
+COMPLETENESS_MIN_LENGTH = 50
+
+
+def validate_output_safety(output: str) -> Tuple[bool, str]:
+    """
+    Checks LLM output for dangerous medical advice patterns.
+    Returns (is_safe, reason).
+    """
+    if not output or not output.strip():
+        return False, "Output is empty."
+    lowered = output.lower()
+    for pattern in UNSAFE_OUTPUT_PATTERNS:
+        if pattern in lowered:
+            return False, f"Output contains potentially unsafe guidance: '{pattern}'. Review before use."
+    return True, "Output passed safety check."
+
+
+def check_response_completeness(recommendation: str, plan: dict) -> Tuple[bool, List[str]]:
+    """
+    Verifies all required response fields are meaningfully populated.
+    Returns (is_complete, list_of_missing_fields).
+    """
+    missing = []
+    if not recommendation or len(recommendation.strip()) < COMPLETENESS_MIN_LENGTH:
+        missing.append("recommendation is too short or empty")
+    if not plan.get("immediate_actions"):
+        missing.append("immediate_actions is empty")
+    if not plan.get("short_term_actions"):
+        missing.append("short_term_actions is empty")
+    if not plan.get("priority_level"):
+        missing.append("priority_level is missing")
+    if not plan.get("parts_to_inspect"):
+        missing.append("parts_to_inspect is empty")
+    return len(missing) == 0, missing

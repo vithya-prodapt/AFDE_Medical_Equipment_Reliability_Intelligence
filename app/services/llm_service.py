@@ -9,6 +9,8 @@ from app.config import OPENAI_API_KEY, OPENAI_BASE_URL, LLM_MODEL
 
 MAX_CONTEXT_TOKENS = 8000
 CHARS_PER_TOKEN = 4
+MAX_RETRIES = 3
+RETRY_DELAY_BASE = 2  # seconds — doubles each attempt (2s, 4s, 8s)
 
 _http_client = httpx.Client(verify=False, timeout=120.0)
 
@@ -45,35 +47,48 @@ class LLMService:
         temperature: float = 0.3,
     ) -> str:
         max_tokens = min(max_tokens, 500)
-        start = time.time()
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                max_tokens=max_tokens,
-                temperature=temperature,
-            )
-            latency_ms = round((time.time() - start) * 1000)
-            self._total_calls += 1
-            self._total_latency_ms += latency_ms
-            if response.usage:
-                self.total_prompt_tokens += response.usage.prompt_tokens
-                self.total_completion_tokens += response.usage.completion_tokens
+        last_error = None
+
+        for attempt in range(MAX_RETRIES):
+            start = time.time()
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                )
+                latency_ms = round((time.time() - start) * 1000)
+                self._total_calls += 1
+                self._total_latency_ms += latency_ms
+                if response.usage:
+                    self.total_prompt_tokens += response.usage.prompt_tokens
+                    self.total_completion_tokens += response.usage.completion_tokens
                 _llm_logger.info(
-                    f"OK model={self.model} max_tokens={max_tokens} "
-                    f"prompt_tokens={response.usage.prompt_tokens} "
-                    f"completion_tokens={response.usage.completion_tokens} "
+                    f"OK attempt={attempt + 1} model={self.model} "
+                    f"prompt_tokens={response.usage.prompt_tokens if response.usage else '?'} "
+                    f"completion_tokens={response.usage.completion_tokens if response.usage else '?'} "
                     f"latency_ms={latency_ms}"
                 )
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            latency_ms = round((time.time() - start) * 1000)
-            self._error_calls += 1
-            _llm_logger.error(
-                f"ERROR model={self.model} max_tokens={max_tokens} "
-                f"error={type(e).__name__}: {e} latency_ms={latency_ms}"
-            )
-            raise
+                return response.choices[0].message.content.strip()
+
+            except Exception as e:
+                last_error = e
+                latency_ms = round((time.time() - start) * 1000)
+                if attempt < MAX_RETRIES - 1:
+                    wait = RETRY_DELAY_BASE * (2 ** attempt)
+                    _llm_logger.warning(
+                        f"RETRY attempt={attempt + 1}/{MAX_RETRIES} model={self.model} "
+                        f"error={type(e).__name__}: {e} retrying_in={wait}s"
+                    )
+                    time.sleep(wait)
+                else:
+                    self._error_calls += 1
+                    _llm_logger.error(
+                        f"FAILED all {MAX_RETRIES} attempts model={self.model} "
+                        f"error={type(e).__name__}: {e} latency_ms={latency_ms}"
+                    )
+        raise last_error
 
     def get_monitoring_stats(self) -> Dict:
         avg_latency = (

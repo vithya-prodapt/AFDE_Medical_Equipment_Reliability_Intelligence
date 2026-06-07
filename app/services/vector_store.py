@@ -123,6 +123,98 @@ class VectorStoreService:
             metadata={"hnsw:space": "cosine"},
         )
 
+    # ── Backup / Rollback ────────────────────────────────────────────────────
+
+    @property
+    def _backup_name(self) -> str:
+        return f"{COLLECTION_NAME}_backup"
+
+    def backup_collection(self) -> bool:
+        """
+        Copies the current collection into a backup collection before a
+        destructive re-ingest. Safe to call even when no data exists.
+        Returns True on success.
+        """
+        count = self.get_count()
+        if count == 0:
+            print("[VectorStore] Nothing to back up — collection is empty.")
+            return True
+        try:
+            # Drop old backup if present
+            try:
+                self.client.delete_collection(self._backup_name)
+            except Exception:
+                pass
+
+            backup_col = self.client.get_or_create_collection(
+                name=self._backup_name,
+                metadata={"hnsw:space": "cosine"},
+            )
+
+            data = self.collection.get(
+                limit=min(count, 10000),
+                include=["documents", "metadatas", "embeddings"],
+            )
+            if data["ids"]:
+                batch_size = 100
+                for i in range(0, len(data["ids"]), batch_size):
+                    backup_col.add(
+                        ids=data["ids"][i: i + batch_size],
+                        embeddings=data["embeddings"][i: i + batch_size],
+                        documents=data["documents"][i: i + batch_size],
+                        metadatas=data["metadatas"][i: i + batch_size],
+                    )
+            print(f"[VectorStore] Backup created: {len(data['ids'])} records → '{self._backup_name}'.")
+            return True
+        except Exception as e:
+            print(f"[VectorStore] Backup failed: {e}")
+            return False
+
+    def restore_from_backup(self) -> bool:
+        """
+        Restores the main collection from the backup.
+        Returns True on success.
+        """
+        try:
+            backup_col = self.client.get_collection(self._backup_name)
+        except Exception:
+            print("[VectorStore] No backup collection found.")
+            return False
+
+        backup_count = backup_col.count()
+        if backup_count == 0:
+            print("[VectorStore] Backup collection is empty — nothing to restore.")
+            return False
+
+        try:
+            self.delete_collection()
+            data = backup_col.get(
+                limit=min(backup_count, 10000),
+                include=["documents", "metadatas", "embeddings"],
+            )
+            if data["ids"]:
+                batch_size = 100
+                for i in range(0, len(data["ids"]), batch_size):
+                    self.collection.add(
+                        ids=data["ids"][i: i + batch_size],
+                        embeddings=data["embeddings"][i: i + batch_size],
+                        documents=data["documents"][i: i + batch_size],
+                        metadatas=data["metadatas"][i: i + batch_size],
+                    )
+            print(f"[VectorStore] Restored {len(data['ids'])} records from backup.")
+            return True
+        except Exception as e:
+            print(f"[VectorStore] Restore failed: {e}")
+            return False
+
+    def has_backup(self) -> bool:
+        """Returns True if a non-empty backup collection exists."""
+        try:
+            col = self.client.get_collection(self._backup_name)
+            return col.count() > 0
+        except Exception:
+            return False
+
     def get_stats(self) -> Dict[str, Any]:
         count = self.get_count()
         if count == 0:

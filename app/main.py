@@ -2,8 +2,8 @@ import os
 import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 
 from app.routers import health, query, admin
@@ -83,23 +83,23 @@ frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "fronten
 frontend_dist = os.path.join(frontend_dir, "dist")
 index_html = os.path.join(frontend_dist, "index.html")
 
+NO_CACHE = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"}
+CACHE_FOREVER = {"Cache-Control": "public, max-age=31536000, immutable"}
+
 if os.path.isdir(frontend_dist):
-    # Serve any file that exists in dist/ directly (CSS, JS, images, fonts).
-    # Fall back to index.html for everything else (React SPA client-side routing).
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str):
         candidate = os.path.join(frontend_dist, full_path)
         if full_path and os.path.isfile(candidate):
-            return FileResponse(candidate)
-        return FileResponse(index_html)
+            # Hashed assets (CSS/JS) can be cached forever; others get no-cache
+            headers = CACHE_FOREVER if ("/assets/" in full_path) else NO_CACHE
+            return FileResponse(candidate, headers=headers)
+        # Always serve index.html with no-cache so browser fetches fresh HTML
+        return FileResponse(index_html, headers=NO_CACHE)
 else:
     @app.get("/", include_in_schema=False)
     async def root():
-        return {
-            "message": "Medical Equipment AI API — frontend not built.",
-            "docs": "/docs",
-            "health": "/health",
-        }
+        return {"message": "Medical Equipment AI API — frontend not built.", "docs": "/docs"}
 
 
 if __name__ == "__main__":

@@ -184,7 +184,7 @@ input[type='number']:focus {
 }
 
 textarea {
-  resize: vertical;
+  resize: none;
   min-height: 100px;
 }
 
@@ -3018,7 +3018,9 @@ textarea {
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   height: 100%;
   overflow-y: auto;
+  scrollbar-width: none;
 }
+.analysis-left::-webkit-scrollbar { display: none; }
 
 /* â”€â”€ Right panel â”€â”€ */
 .analysis-right {
@@ -3031,7 +3033,9 @@ textarea {
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   height: 100%;
   overflow-y: auto;
+  scrollbar-width: none;
 }
+.analysis-right::-webkit-scrollbar { display: none; }
 
 /* â”€â”€ Section title with sparkle â”€â”€ */
 .analysis-section-title {
@@ -3070,7 +3074,7 @@ textarea {
   border-radius: 8px;
   font-size: 0.875rem;
   background: #f8fafc;
-  resize: vertical;
+  resize: none;
   min-height: 90px;
   transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;

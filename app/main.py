@@ -62,16 +62,21 @@ app.include_router(admin.router)
 
 frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 frontend_dist = os.path.join(frontend_dir, "dist")
+index_html = os.path.join(frontend_dist, "index.html")
 
 if os.path.isdir(frontend_dist):
-    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
-elif os.path.isdir(frontend_dir):
-    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
+    # Serve static assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
+
+    # Catch-all: serve index.html for every non-API path (React SPA routing)
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        return FileResponse(index_html)
 else:
     @app.get("/", include_in_schema=False)
     async def root():
         return {
-            "message": "Medical Equipment AI API",
+            "message": "Medical Equipment AI API — frontend not built.",
             "docs": "/docs",
             "health": "/health",
         }

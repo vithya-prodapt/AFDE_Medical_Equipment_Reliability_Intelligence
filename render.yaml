@@ -2,8 +2,10 @@ services:
   - type: web
     name: medical-equipment-ai
     env: python
-    buildCommand: pip install -r requirements.txt
+    pythonVersion: "3.11.0"
+    buildCommand: pip install -r requirements.txt && cd frontend && npm install && npm run build && cd ..
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
     envVars:
       - key: OPENAI_API_KEY
         value: learner042
@@ -23,4 +25,5 @@ services:
         value: "50"
       - key: SAMPLE_DATA_SIZE
         value: "1000"
-    healthCheckPath: /health
+      - key: NODE_VERSION
+        value: "18.20.0"

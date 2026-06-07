@@ -84,12 +84,13 @@ frontend_dist = os.path.join(frontend_dir, "dist")
 index_html = os.path.join(frontend_dist, "index.html")
 
 if os.path.isdir(frontend_dist):
-    # Serve static assets (JS, CSS, images)
-    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
-
-    # Catch-all: serve index.html for every non-API path (React SPA routing)
+    # Serve any file that exists in dist/ directly (CSS, JS, images, fonts).
+    # Fall back to index.html for everything else (React SPA client-side routing).
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str):
+        candidate = os.path.join(frontend_dist, full_path)
+        if full_path and os.path.isfile(candidate):
+            return FileResponse(candidate)
         return FileResponse(index_html)
 else:
     @app.get("/", include_in_schema=False)

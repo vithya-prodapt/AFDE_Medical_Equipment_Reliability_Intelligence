@@ -1,4 +1,6 @@
-﻿:root {
+﻿/* build-202606071212 */
+:root {
+  --build: 2;
   --primary: #1a5276;
   --accent: #2980b9;
   --success: #27ae60;

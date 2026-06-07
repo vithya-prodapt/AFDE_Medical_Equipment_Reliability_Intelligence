@@ -24,6 +24,6 @@ services:
       - key: EMBEDDING_BATCH_SIZE
         value: "50"
       - key: SAMPLE_DATA_SIZE
-        value: "1000"
+        value: "500"
       - key: NODE_VERSION
         value: "18.20.0"

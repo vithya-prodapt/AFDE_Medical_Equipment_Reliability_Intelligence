@@ -356,8 +356,14 @@ export function AnalysisPage({ user }) {
         }),
       });
       if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.detail || 'Query failed.');
+        const body = await response.json().catch(() => ({}));
+        if (response.status === 503) {
+          throw new Error(
+            'Knowledge base is still loading — the system ingests equipment data on startup. ' +
+            'Please wait 1–2 minutes and try again. Check system status in the header badge.'
+          );
+        }
+        throw new Error(body.detail || `Request failed (${response.status}).`);
       }
       const data = await response.json();
       setResult(data);
@@ -369,6 +375,12 @@ export function AnalysisPage({ user }) {
   };
 
   const systemReady = health?.ingestion_state === 'done';
+  const ingestionState = health?.ingestion_state ?? 'loading';
+  const badgeLabel = systemReady ? 'System Ready'
+    : ingestionState === 'running' ? 'Initializing…'
+    : ingestionState === 'retrying' ? 'Retrying ingest…'
+    : ingestionState === 'failed' ? 'Ingest Failed'
+    : 'Loading…';
 
   /* ── Severity counts from retrieved incidents ── */
   const incidents = result?.retrieved_incidents ?? [];
@@ -403,9 +415,9 @@ export function AnalysisPage({ user }) {
           </div>
         </div>
         <div className="analysis-header-right">
-          <div className={`analysis-system-badge ${systemReady ? 'badge-ready' : 'badge-loading'}`}>
+          <div className={`analysis-system-badge ${systemReady ? 'badge-ready' : ingestionState === 'failed' ? 'badge-error' : 'badge-loading'}`}>
             <span className="analysis-badge-dot" />
-            {systemReady ? 'System Ready' : health?.ingestion_state === 'running' ? 'Initializing…' : 'Loading…'}
+            {badgeLabel}
           </div>
           <div className="analysis-bell-wrap">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

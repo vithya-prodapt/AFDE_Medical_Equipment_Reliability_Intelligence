@@ -16,15 +16,34 @@ ingestion_status: dict = {"state": "pending", "message": "Ingestion not started 
 
 async def _background_ingest():
     global ingestion_status
-    ingestion_status = {"state": "running", "message": "Ingesting equipment data…"}
-    try:
-        loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(None, ingestion_pipeline.run)
-        ingestion_status = {"state": "done", "message": result["message"]}
-        print(f"[Ingest] {result['message']}")
-    except Exception as e:
-        ingestion_status = {"state": "failed", "message": str(e)}
-        print(f"[Ingest] Failed: {e}. Use POST /api/ingest to retry.")
+    max_attempts = 3
+    for attempt in range(1, max_attempts + 1):
+        ingestion_status = {
+            "state": "running",
+            "message": f"Ingesting equipment data… (attempt {attempt}/{max_attempts})",
+        }
+        print(f"[Ingest] Starting attempt {attempt}/{max_attempts}…")
+        try:
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(None, ingestion_pipeline.run)
+            ingestion_status = {"state": "done", "message": result["message"]}
+            print(f"[Ingest] {result['message']}")
+            return
+        except Exception as e:
+            print(f"[Ingest] Attempt {attempt} failed: {e}")
+            if attempt < max_attempts:
+                wait = 30 * attempt  # 30s, 60s
+                ingestion_status = {
+                    "state": "retrying",
+                    "message": f"Attempt {attempt} failed. Retrying in {wait}s…",
+                }
+                await asyncio.sleep(wait)
+            else:
+                ingestion_status = {
+                    "state": "failed",
+                    "message": f"All {max_attempts} attempts failed: {e}. Call POST /api/ingest to retry.",
+                }
+                print(f"[Ingest] All attempts exhausted. Use POST /api/ingest to retry.")
 
 
 @asynccontextmanager

@@ -8,7 +8,10 @@ OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL", "https://keygateway.arshnivl
 LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4o-mini")
 EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
 
-CHROMA_PERSIST_DIR: str = os.getenv("CHROMA_PERSIST_DIR", "/tmp/chroma_db")
+# Default: store ChromaDB inside the project folder so data persists locally.
+# On Render, the CHROMA_PERSIST_DIR env var overrides this to /tmp/chroma_db.
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CHROMA_PERSIST_DIR: str = os.getenv("CHROMA_PERSIST_DIR", os.path.join(_BASE_DIR, "chroma_db"))
 COLLECTION_NAME: str = os.getenv("COLLECTION_NAME", "medical_equipment_incidents")
 
 MAX_RETRIEVAL_RESULTS: int = int(os.getenv("MAX_RETRIEVAL_RESULTS", "10"))
